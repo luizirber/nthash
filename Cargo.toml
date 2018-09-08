@@ -1,0 +1,6 @@
+[package]
+name = "nthash"
+version = "0.1.0"
+authors = ["Luiz Irber <luiz.irber@gmail.com>"]
+
+[dependencies]
