@@ -20,7 +20,7 @@ fn rc(nt: u8) -> u64 {
     }
 }
 
-fn f(s: &[u8], i: usize, k: u32) -> u64 {
+pub fn f(s: &[u8], i: usize, k: u32) -> u64 {
     let mut out = h(s[i + (k as usize) - 1]);
     for (idx, v) in s.iter().skip(i).take((k - 1) as usize).enumerate() {
         out = out ^ h(*v).rotate_left(k - (idx as u32 + 1));
@@ -28,7 +28,7 @@ fn f(s: &[u8], i: usize, k: u32) -> u64 {
     out
 }
 
-fn r(s: &[u8], i: usize, k: u32) -> u64 {
+pub fn r(s: &[u8], i: usize, k: u32) -> u64 {
     let mut out = rc(s[i]);
     for (idx, v) in s.iter().skip(i + 1).take((k - 1) as usize).enumerate() {
         out = out ^ rc(*v).rotate_left(idx as u32 + 1);
