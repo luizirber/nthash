@@ -20,7 +20,7 @@ fn rc(nt: u8) -> u64 {
     }
 }
 
-pub fn f(s: &[u8], i: usize, k: u32) -> u64 {
+pub fn ntf64(s: &[u8], i: usize, k: u32) -> u64 {
     let mut out = h(s[i + (k as usize) - 1]);
     for (idx, v) in s.iter().skip(i).take((k - 1) as usize).enumerate() {
         out = out ^ h(*v).rotate_left(k - (idx as u32 + 1));
@@ -28,7 +28,7 @@ pub fn f(s: &[u8], i: usize, k: u32) -> u64 {
     out
 }
 
-pub fn r(s: &[u8], i: usize, k: u32) -> u64 {
+pub fn ntr64(s: &[u8], i: usize, k: u32) -> u64 {
     let mut out = rc(s[i]);
     for (idx, v) in s.iter().skip(i + 1).take((k - 1) as usize).enumerate() {
         out = out ^ rc(*v).rotate_left(idx as u32 + 1);
@@ -36,16 +36,14 @@ pub fn r(s: &[u8], i: usize, k: u32) -> u64 {
     out
 }
 
-fn nthash_init(s: &[u8], ksize: u8) -> u64 {
-    u64::min(r(s, 0, ksize as u32), f(s, 0, ksize as u32))
+fn ntc64(s: &[u8], ksize: u8) -> u64 {
+    u64::min(ntr64(s, 0, ksize as u32), ntf64(s, 0, ksize as u32))
 }
 
 pub fn nthash(seq: &[u8], ksize: u8) -> Vec<u64> {
-    let mut out = Vec::with_capacity(seq.len() - (ksize as usize) + 1);
-    let v = nthash_init(seq.get(0..ksize as usize).unwrap(), ksize);
-    out.push(v);
-
-    out
+    seq.windows(ksize as usize)
+        .map(|x| ntc64(x, ksize))
+        .collect()
 }
 
 #[cfg(test)]
