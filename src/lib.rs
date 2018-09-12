@@ -46,8 +46,64 @@ pub fn nthash(seq: &[u8], ksize: u8) -> Vec<u64> {
         .collect()
 }
 
+struct ntHashIterator<'a> {
+    seq: &'a [u8],
+    ksize: u8,
+    fh: u64,
+    rh: u64,
+    current_idx: usize,
+    max_idx: usize,
+}
+
+impl<'a> ntHashIterator<'a> {
+    fn new(seq: &'a [u8], ksize: u8) -> ntHashIterator<'a> {
+        ntHashIterator {
+            seq,
+            ksize,
+            fh: 0,
+            rh: 0,
+            current_idx: 0,
+            max_idx: seq.len() - ksize as usize + 1,
+        }
+    }
+}
+
+impl<'a> Iterator for ntHashIterator<'a> {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<u64> {
+        if self.current_idx == self.max_idx {
+            None
+        } else if self.current_idx == 0 {
+            self.fh = ntf64(self.seq, self.current_idx, self.ksize as u32);
+            self.rh = ntr64(self.seq, self.current_idx, self.ksize as u32);
+            self.current_idx += 1;
+            Some(u64::min(self.rh, self.fh))
+        } else {
+            let i = self.current_idx - 1;
+            let k = self.ksize as usize;
+
+            self.fh =
+                self.fh.rotate_left(1) ^ h(self.seq[i]).rotate_left(k as u32) ^ h(self.seq[i + k]);
+
+            self.rh = self.rh.rotate_right(1)
+                ^ rc(self.seq[i]).rotate_right(1)
+                ^ rc(self.seq[i + k]).rotate_left(k as u32 - 1);
+
+            self.current_idx += 1;
+            Some(u64::min(self.rh, self.fh))
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let n = self.seq.len() - self.ksize as usize + 1;
+        (n, Some(n))
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use ntHashIterator;
     use nthash;
 
     #[test]
@@ -75,5 +131,16 @@ mod tests {
                 0x14a33bb928277bed,
             ]
         )
+    }
+
+    #[test]
+    fn iter_cmp() {
+        let ksize = 5;
+        for s in &vec!["TGCAG", "ACGTC", "ACGTCGTCAGTCGATGCAGT"] {
+            let seq = s.as_bytes();
+            let iter = ntHashIterator::new(seq, ksize);
+            println!("{:?}", s);
+            assert_eq!(nthash(seq, ksize), iter.collect::<Vec<u64>>());
+        }
     }
 }
