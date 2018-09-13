@@ -26,13 +26,26 @@ fn oracle_cmp() {
             0xbafa6728fc6dabf,
             0x14a33bb928277bed,
         ]
-    )
+    );
+    assert_eq!(
+        nthash(b"ACGTCGANNGTA", 5),
+        vec![
+            0x480202d54e8ebecd,
+            0xa997bdc628b4c98e,
+            0xd1865edfeb55b037,
+            0xe0159f5a89f59b7b,
+            0xe6409a0f689e64e4,
+            0x7a054a39df661723,
+            0x6d74fee702835974,
+            0xb74444dd9a94cbf3,
+        ]
+    );
 }
 
 #[test]
 fn iter_cmp() {
     let ksize = 5;
-    for s in &vec!["TGCAG", "ACGTC", "ACGTCGTCAGTCGATGCAGT"] {
+    for s in &vec!["TGCAG", "ACGTC", "ACGTCGTCAGTCGATGCAGT", "ACGTCGANNGTA"] {
         let seq = s.as_bytes();
         let iter = NtHashIterator::new(seq, ksize);
         println!("{:?}", s);
