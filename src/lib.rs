@@ -1,3 +1,4 @@
+#[inline(always)]
 fn h(c: u8) -> u64 {
     match c {
         b'A' => 0x3c8b_fbb3_95c6_0474,
@@ -9,6 +10,7 @@ fn h(c: u8) -> u64 {
     }
 }
 
+#[inline(always)]
 fn rc(nt: u8) -> u64 {
     match nt {
         b'A' => 0x2955_49f5_4be2_4456,
