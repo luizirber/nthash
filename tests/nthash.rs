@@ -1,4 +1,10 @@
 extern crate nthash;
+#[macro_use]
+extern crate quickcheck;
+extern crate rand;
+
+use quickcheck::{Arbitrary, Gen};
+use rand::Rng;
 
 use nthash::{nthash, NtHashIterator};
 
@@ -51,4 +57,32 @@ fn iter_cmp() {
         println!("{:?}", s);
         assert_eq!(nthash(seq, ksize), iter.collect::<Vec<u64>>());
     }
+}
+
+#[derive(Clone, Debug)]
+struct Seq(String);
+
+impl Arbitrary for Seq {
+    fn arbitrary<G: Gen>(g: &mut G) -> Seq {
+        let choices = ['A', 'C', 'G', 'T', 'N'];
+        let size = {
+            let s = g.size();
+            g.gen_range(0, s)
+        };
+        let mut s = String::with_capacity(size);
+        for _ in 0..size {
+            s.push(*g.choose(&choices).expect("Not a valid nucleotide"));
+        }
+        Seq { 0: s }
+    }
+}
+
+quickcheck! {
+  fn oracle_quickcheck(s: Seq) -> bool {
+     let seq = s.0.as_bytes();
+     (1..(seq.len())).all(|ksize| {
+       let iter = NtHashIterator::new(seq, ksize as u8);
+       nthash(seq, ksize as u8) == iter.collect::<Vec<u64>>()
+     })
+  }
 }
