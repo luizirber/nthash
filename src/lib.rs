@@ -1,3 +1,14 @@
+//! ntHash is a hash function tuned for genomic data.
+//! It performs best when calculating hash values for adjacent k-mers in
+//! an input sequence, operating an order of magnitude faster than the best
+//! performing alternatives in typical use cases.
+//!
+//! [Scientific article with more details](https://doi.org/10.1093/bioinformatics/btw397)
+//!
+//! [Original implementation in C++](https://github.com/bcgsc/ntHash/)
+//!
+//! This crate is based on ntHash [1.0.4](https://github.com/bcgsc/ntHash/releases/tag/v1.0.4).
+
 #[inline(always)]
 fn h(c: u8) -> u64 {
     match c {
@@ -22,6 +33,15 @@ fn rc(nt: u8) -> u64 {
     }
 }
 
+/// Calculate the hash for a k-mer in the forward strand of a sequence.
+///
+/// This is a low level function, more useful for debugging than for direct use.
+///
+/// ```
+///    use nthash::ntf64;
+///    let fh = ntf64(b"TGCAG", 0, 5);
+///    assert_eq!(fh, 0xbafa6728fc6dabf);
+/// ```
 pub fn ntf64(s: &[u8], i: usize, k: u32) -> u64 {
     let mut out = h(s[i + (k as usize) - 1]);
     for (idx, v) in s.iter().skip(i).take((k - 1) as usize).enumerate() {
@@ -30,6 +50,15 @@ pub fn ntf64(s: &[u8], i: usize, k: u32) -> u64 {
     out
 }
 
+/// Calculate the hash for a k-mer in the reverse strand of a sequence.
+///
+/// This is a low level function, more useful for debugging than for direct use.
+///
+/// ```
+///    use nthash::ntr64;
+///    let rh = ntr64(b"TGCAG", 0, 5);
+///    assert_eq!(rh, 0x8cf2d4072cca480e);
+/// ```
 pub fn ntr64(s: &[u8], i: usize, k: u32) -> u64 {
     let mut out = rc(s[i]);
     for (idx, v) in s.iter().skip(i + 1).take((k - 1) as usize).enumerate() {
@@ -38,16 +67,50 @@ pub fn ntr64(s: &[u8], i: usize, k: u32) -> u64 {
     out
 }
 
+/// Calculate the canonical hash (minimum hash value between the forward
+/// and reverse strands in a sequence).
+///
+/// This is a low level function, more useful for debugging than for direct use.
+///
+/// ```
+///    use nthash::ntc64;
+///    let hash = ntc64(b"TGCAG", 0, 5);
+///    assert_eq!(hash, 0xbafa6728fc6dabf);
+/// ```
 pub fn ntc64(s: &[u8], i: usize, ksize: u8) -> u64 {
     u64::min(ntr64(s, i, u32::from(ksize)), ntf64(s, i, u32::from(ksize)))
 }
 
+/// Takes a sequence and ksize and returns the canonical hashes for each k-mer
+/// in a Vec. This doesn't benefit from the rolling hash properties of ntHash,
+/// serving more for correctness check for the NtHashIterator.
 pub fn nthash(seq: &[u8], ksize: u8) -> Vec<u64> {
     seq.windows(ksize as usize)
         .map(|x| ntc64(x, 0, ksize))
         .collect()
 }
 
+/// An efficient iterator for calculating hashes for genomic sequences.
+///
+/// Since it implements the `Iterator` trait it also
+/// exposes many other useful methods. In this example we use `collect` to
+/// generate all hashes and put them in a `Vec<u64>`.
+/// ```
+///     use nthash::NtHashIterator;
+///
+///     let seq = b"ACTGC";
+///     let iter = NtHashIterator::new(seq, 3);
+///     let hashes: Vec<u64> = iter.collect();
+///     assert_eq!(hashes,
+///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
+/// ```
+/// or, in one line:
+/// ```
+///     use nthash::NtHashIterator;
+///
+///     assert_eq!(NtHashIterator::new(b"ACTGC", 3).collect::<Vec<u64>>(),
+///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
+/// ```
 pub struct NtHashIterator<'a> {
     seq: &'a [u8],
     ksize: u8,
@@ -58,6 +121,7 @@ pub struct NtHashIterator<'a> {
 }
 
 impl<'a> NtHashIterator<'a> {
+    /// Creates a new NtHashIterator with internal state properly initialized.
     pub fn new(seq: &'a [u8], ksize: u8) -> NtHashIterator<'a> {
         NtHashIterator {
             seq,

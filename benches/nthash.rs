@@ -18,8 +18,7 @@ fn nthash_bench(c: &mut Criterion) {
             2 => 'G',
             3 => 'T',
             _ => 'N',
-        })
-        .collect::<String>();
+        }).collect::<String>();
 
     let nthash_it = Fun::new("nthash_iterator", |b: &mut Bencher, i: &String| {
         b.iter(|| {
