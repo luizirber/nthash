@@ -81,8 +81,8 @@ quickcheck! {
   fn oracle_quickcheck(s: Seq) -> bool {
      let seq = s.0.as_bytes();
      (1..(seq.len())).all(|ksize| {
-       let iter = NtHashIterator::new(seq, ksize as u8);
-       nthash(seq, ksize as u8) == iter.collect::<Vec<u64>>()
+       let iter = NtHashIterator::new(seq, ksize);
+       nthash(seq, ksize) == iter.collect::<Vec<u64>>()
      })
   }
 }

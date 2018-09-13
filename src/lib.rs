@@ -42,10 +42,10 @@ fn rc(nt: u8) -> u64 {
 ///    let fh = ntf64(b"TGCAG", 0, 5);
 ///    assert_eq!(fh, 0xbafa6728fc6dabf);
 /// ```
-pub fn ntf64(s: &[u8], i: usize, k: u32) -> u64 {
-    let mut out = h(s[i + (k as usize) - 1]);
-    for (idx, v) in s.iter().skip(i).take((k - 1) as usize).enumerate() {
-        out ^= h(*v).rotate_left(k - (idx as u32 + 1));
+pub fn ntf64(s: &[u8], i: usize, k: usize) -> u64 {
+    let mut out = h(s[i + k - 1]);
+    for (idx, v) in s.iter().skip(i).take(k - 1).enumerate() {
+        out ^= h(*v).rotate_left((k - idx - 1) as u32);
     }
     out
 }
@@ -59,9 +59,9 @@ pub fn ntf64(s: &[u8], i: usize, k: u32) -> u64 {
 ///    let rh = ntr64(b"TGCAG", 0, 5);
 ///    assert_eq!(rh, 0x8cf2d4072cca480e);
 /// ```
-pub fn ntr64(s: &[u8], i: usize, k: u32) -> u64 {
+pub fn ntr64(s: &[u8], i: usize, k: usize) -> u64 {
     let mut out = rc(s[i]);
-    for (idx, v) in s.iter().skip(i + 1).take((k - 1) as usize).enumerate() {
+    for (idx, v) in s.iter().skip(i + 1).take(k - 1).enumerate() {
         out ^= rc(*v).rotate_left(idx as u32 + 1);
     }
     out
@@ -77,17 +77,15 @@ pub fn ntr64(s: &[u8], i: usize, k: u32) -> u64 {
 ///    let hash = ntc64(b"TGCAG", 0, 5);
 ///    assert_eq!(hash, 0xbafa6728fc6dabf);
 /// ```
-pub fn ntc64(s: &[u8], i: usize, ksize: u8) -> u64 {
-    u64::min(ntr64(s, i, u32::from(ksize)), ntf64(s, i, u32::from(ksize)))
+pub fn ntc64(s: &[u8], i: usize, ksize: usize) -> u64 {
+    u64::min(ntr64(s, i, ksize), ntf64(s, i, ksize))
 }
 
 /// Takes a sequence and ksize and returns the canonical hashes for each k-mer
 /// in a Vec. This doesn't benefit from the rolling hash properties of ntHash,
 /// serving more for correctness check for the NtHashIterator.
-pub fn nthash(seq: &[u8], ksize: u8) -> Vec<u64> {
-    seq.windows(ksize as usize)
-        .map(|x| ntc64(x, 0, ksize))
-        .collect()
+pub fn nthash(seq: &[u8], ksize: usize) -> Vec<u64> {
+    seq.windows(ksize).map(|x| ntc64(x, 0, ksize)).collect()
 }
 
 /// An efficient iterator for calculating hashes for genomic sequences.
@@ -113,7 +111,7 @@ pub fn nthash(seq: &[u8], ksize: u8) -> Vec<u64> {
 /// ```
 pub struct NtHashIterator<'a> {
     seq: &'a [u8],
-    ksize: u8,
+    k: usize,
     fh: u64,
     rh: u64,
     current_idx: usize,
@@ -122,14 +120,14 @@ pub struct NtHashIterator<'a> {
 
 impl<'a> NtHashIterator<'a> {
     /// Creates a new NtHashIterator with internal state properly initialized.
-    pub fn new(seq: &'a [u8], ksize: u8) -> NtHashIterator<'a> {
+    pub fn new(seq: &'a [u8], k: usize) -> NtHashIterator<'a> {
         NtHashIterator {
             seq,
-            ksize,
+            k,
             fh: 0,
             rh: 0,
             current_idx: 0,
-            max_idx: seq.len() - ksize as usize + 1,
+            max_idx: seq.len() - k + 1,
         }
     }
 }
@@ -141,20 +139,26 @@ impl<'a> Iterator for NtHashIterator<'a> {
         if self.current_idx == self.max_idx {
             None
         } else if self.current_idx == 0 {
-            self.fh = ntf64(self.seq, self.current_idx, u32::from(self.ksize));
-            self.rh = ntr64(self.seq, self.current_idx, u32::from(self.ksize));
+            for (i, v) in self.seq[0..self.k].iter().enumerate() {
+                self.fh ^= h(*v).rotate_left((self.k - i - 1) as u32);
+            }
+
+            for (i, v) in self.seq[0..self.k].iter().rev().enumerate() {
+                self.rh ^= rc(*v).rotate_left((self.k - i - 1) as u32);
+            }
+
             self.current_idx += 1;
             Some(u64::min(self.rh, self.fh))
         } else {
             let i = self.current_idx - 1;
-            let k = self.ksize as usize;
 
-            self.fh =
-                self.fh.rotate_left(1) ^ h(self.seq[i]).rotate_left(k as u32) ^ h(self.seq[i + k]);
+            self.fh = self.fh.rotate_left(1)
+                ^ h(self.seq[i]).rotate_left(self.k as u32)
+                ^ h(self.seq[i + self.k]);
 
             self.rh = self.rh.rotate_right(1)
                 ^ rc(self.seq[i]).rotate_right(1)
-                ^ rc(self.seq[i + k]).rotate_left(k as u32 - 1);
+                ^ rc(self.seq[i + self.k]).rotate_left(self.k as u32 - 1);
 
             self.current_idx += 1;
             Some(u64::min(self.rh, self.fh))
@@ -162,7 +166,6 @@ impl<'a> Iterator for NtHashIterator<'a> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let n = self.seq.len() - self.ksize as usize + 1;
-        (n, Some(n))
+        (self.max_idx, Some(self.max_idx))
     }
 }
