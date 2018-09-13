@@ -1,14 +1,20 @@
 [package]
 name = "nthash"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Luiz Irber <luiz.irber@gmail.com>"]
+description = "ntHash is a rolling hash function for hashing all possible k-mers in a DNA sequence."
+repository = "https://github.com/luizirber/nthash"
+documentation = "https://docs.rs/nthash"
+keywords = ["bioinformatics"]
+categories = ["science", "algorithms"]
+license = "MIT/Apache-2.0"
+readme = 'README.md'
 
 [dependencies]
 
 [dev-dependencies]
 criterion = "0.2"
 rand = "0.5"
-
 
 [[bench]]
 name = "nthash"
