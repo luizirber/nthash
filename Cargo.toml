@@ -4,3 +4,12 @@ version = "0.1.0"
 authors = ["Luiz Irber <luiz.irber@gmail.com>"]
 
 [dependencies]
+
+[dev-dependencies]
+criterion = "0.2"
+rand = "0.5"
+
+
+[[bench]]
+name = "nthash"
+harness = false
