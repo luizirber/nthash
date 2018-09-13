@@ -36,13 +36,13 @@ pub fn ntr64(s: &[u8], i: usize, k: u32) -> u64 {
     out
 }
 
-fn ntc64(s: &[u8], ksize: u8) -> u64 {
-    u64::min(ntr64(s, 0, u32::from(ksize)), ntf64(s, 0, u32::from(ksize)))
+pub fn ntc64(s: &[u8], i: usize, ksize: u8) -> u64 {
+    u64::min(ntr64(s, i, u32::from(ksize)), ntf64(s, i, u32::from(ksize)))
 }
 
 pub fn nthash(seq: &[u8], ksize: u8) -> Vec<u64> {
     seq.windows(ksize as usize)
-        .map(|x| ntc64(x, ksize))
+        .map(|x| ntc64(x, 0, ksize))
         .collect()
 }
 
