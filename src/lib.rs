@@ -121,11 +121,21 @@ pub struct NtHashIterator<'a> {
 impl<'a> NtHashIterator<'a> {
     /// Creates a new NtHashIterator with internal state properly initialized.
     pub fn new(seq: &'a [u8], k: usize) -> NtHashIterator<'a> {
+        let mut fh = 0;
+        for (i, v) in seq[0..k].iter().enumerate() {
+            fh ^= h(*v).rotate_left((k - i - 1) as u32);
+        }
+
+        let mut rh = 0;
+        for (i, v) in seq[0..k].iter().rev().enumerate() {
+            rh ^= rc(*v).rotate_left((k - i - 1) as u32);
+        }
+
         NtHashIterator {
             seq,
             k,
-            fh: 0,
-            rh: 0,
+            fh,
+            rh,
             current_idx: 0,
             max_idx: seq.len() - k + 1,
         }
@@ -137,32 +147,23 @@ impl<'a> Iterator for NtHashIterator<'a> {
 
     fn next(&mut self) -> Option<u64> {
         if self.current_idx == self.max_idx {
-            None
-        } else if self.current_idx == 0 {
-            for (i, v) in self.seq[0..self.k].iter().enumerate() {
-                self.fh ^= h(*v).rotate_left((self.k - i - 1) as u32);
-            }
+            return None;
+        };
 
-            for (i, v) in self.seq[0..self.k].iter().rev().enumerate() {
-                self.rh ^= rc(*v).rotate_left((self.k - i - 1) as u32);
-            }
-
-            self.current_idx += 1;
-            Some(u64::min(self.rh, self.fh))
-        } else {
+        if self.current_idx != 0 {
             let i = self.current_idx - 1;
+            let seqi = self.seq[i];
+            let seqk = self.seq[i + self.k];
 
-            self.fh = self.fh.rotate_left(1)
-                ^ h(self.seq[i]).rotate_left(self.k as u32)
-                ^ h(self.seq[i + self.k]);
+            self.fh = self.fh.rotate_left(1) ^ h(seqi).rotate_left(self.k as u32) ^ h(seqk);
 
             self.rh = self.rh.rotate_right(1)
-                ^ rc(self.seq[i]).rotate_right(1)
-                ^ rc(self.seq[i + self.k]).rotate_left(self.k as u32 - 1);
-
-            self.current_idx += 1;
-            Some(u64::min(self.rh, self.fh))
+                ^ rc(seqi).rotate_right(1)
+                ^ rc(seqk).rotate_left(self.k as u32 - 1);
         }
+
+        self.current_idx += 1;
+        Some(u64::min(self.rh, self.fh))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
