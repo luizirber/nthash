@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 language: rust
 cache: cargo
 addons:
@@ -24,11 +24,12 @@ before_script:
   - cargo install cargo-update || echo "cargo-update already installed"
   - cargo install cargo-travis || echo "cargo-travis already installed"
   - cargo install-update -a # update outdated cached binaries
+  - rustup component add rustfmt-preview
 script:
-  - |
-      cargo build &&
-      cargo test &&
-      cargo bench
+  - cargo fmt -- --check
+  - cargo build
+  - cargo test
+  - cargo bench
 after_success:
   - cargo coverage
   - bash <(curl -s https://codecov.io/bash)
