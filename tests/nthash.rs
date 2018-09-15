@@ -10,40 +10,40 @@ use nthash::{nthash, NtHashIterator};
 
 #[test]
 fn oracle_cmp() {
-    assert_eq!(nthash(b"TGCAG", 5), vec![0xbafa6728fc6dabf]);
-    assert_eq!(nthash(b"ACGTC", 5), vec![0x480202d54e8ebecd]);
+    assert_eq!(nthash(b"TGCAG", 5), vec![0x0baf_a672_8fc6_dabf]);
+    assert_eq!(nthash(b"ACGTC", 5), vec![0x4802_02d5_4e8e_becd]);
     assert_eq!(
         nthash(b"ACGTCGTCAGTCGATGCAGT", 5),
         vec![
-            0x480202d54e8ebecd,
-            0xa997bdc628b4c98e,
-            0x8c6d7ab20911b216,
-            0x5ddcb09390aafeef,
-            0x25ff3ac4bc92382f,
-            0x9bda9a5c35603946,
-            0x82d449e5b3710ccd,
-            0x1e926ce7780ab812,
-            0x2f6ed7b226473a86,
-            0xd1865edfeb55b037,
-            0x38b57494189a8afe,
-            0x1b235fc5ecacf386,
-            0x1eab5d82920fda13,
-            0x2c8d1574673bdcd,
-            0xbafa6728fc6dabf,
-            0x14a33bb928277bed,
+            0x4802_02d5_4e8e_becd,
+            0xa997_bdc6_28b4_c98e,
+            0x8c6d_7ab2_0911_b216,
+            0x5ddc_b093_90aa_feef,
+            0x25ff_3ac4_bc92_382f,
+            0x9bda_9a5c_3560_3946,
+            0x82d4_49e5_b371_0ccd,
+            0x1e92_6ce7_780a_b812,
+            0x2f6e_d7b2_2647_3a86,
+            0xd186_5edf_eb55_b037,
+            0x38b5_7494_189a_8afe,
+            0x1b23_5fc5_ecac_f386,
+            0x1eab_5d82_920f_da13,
+            0x02c8_d157_4673_bdcd,
+            0x0baf_a672_8fc6_dabf,
+            0x14a3_3bb9_2827_7bed,
         ]
     );
     assert_eq!(
         nthash(b"ACGTCGANNGTA", 5),
         vec![
-            0x480202d54e8ebecd,
-            0xa997bdc628b4c98e,
-            0xd1865edfeb55b037,
-            0xe0159f5a89f59b7b,
-            0xe6409a0f689e64e4,
-            0x7a054a39df661723,
-            0x6d74fee702835974,
-            0xb74444dd9a94cbf3,
+            0x4802_02d5_4e8e_becd,
+            0xa997_bdc6_28b4_c98e,
+            0xd186_5edf_eb55_b037,
+            0xe015_9f5a_89f5_9b7b,
+            0xe640_9a0f_689e_64e4,
+            0x7a05_4a39_df66_1723,
+            0x6d74_fee7_0283_5974,
+            0xb744_44dd_9a94_cbf3,
         ]
     );
 }
