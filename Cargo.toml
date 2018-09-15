@@ -13,9 +13,9 @@ readme = 'README.md'
 [dependencies]
 
 [dev-dependencies]
-criterion = "0.2"
-quickcheck = "0.7.1"
-rand = "0.5"
+criterion = "^0.2"
+quickcheck = "^0.7.1"
+rand = "^0.5"
 
 [[bench]]
 name = "nthash"
