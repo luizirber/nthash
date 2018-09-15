@@ -6,7 +6,6 @@ extern crate rand;
 use criterion::{Bencher, Criterion, Fun};
 use nthash::{nthash, NtHashIterator};
 use rand::distributions::{Distribution, Uniform};
-use rand::thread_rng;
 
 fn nthash_bench(c: &mut Criterion) {
     let range = Uniform::from(0..4);
@@ -24,7 +23,7 @@ fn nthash_bench(c: &mut Criterion) {
         b.iter(|| {
             let iter = NtHashIterator::new(i.as_bytes(), 5);
             //  iter.for_each(drop);
-            let res = iter.collect::<Vec<u64>>();
+            let _res = iter.collect::<Vec<u64>>();
         })
     });
 
