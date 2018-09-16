@@ -107,7 +107,7 @@ pub fn nthash(seq: &[u8], ksize: usize) -> Vec<u64> {
 ///     use nthash::NtHashIterator;
 ///
 ///     let seq = b"ACTGC";
-///     let iter = NtHashIterator::new(seq, 3);
+///     let iter = NtHashIterator::new(seq, 3).unwrap();
 ///     let hashes: Vec<u64> = iter.collect();
 ///     assert_eq!(hashes,
 ///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
@@ -116,7 +116,7 @@ pub fn nthash(seq: &[u8], ksize: usize) -> Vec<u64> {
 /// ```
 ///     use nthash::NtHashIterator;
 ///
-///     assert_eq!(NtHashIterator::new(b"ACTGC", 3).collect::<Vec<u64>>(),
+///     assert_eq!(NtHashIterator::new(b"ACTGC", 3).unwrap().collect::<Vec<u64>>(),
 ///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
 /// ```
 #[derive(Debug)]
