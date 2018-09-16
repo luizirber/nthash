@@ -21,7 +21,7 @@ fn nthash_bench(c: &mut Criterion) {
 
     let nthash_it = Fun::new("nthash_iterator", |b: &mut Bencher, i: &String| {
         b.iter(|| {
-            let iter = NtHashIterator::new(i.as_bytes(), 5);
+            let iter = NtHashIterator::new(i.as_bytes(), 5).unwrap();
             //  iter.for_each(drop);
             let _res = iter.collect::<Vec<u64>>();
         })

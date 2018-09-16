@@ -6,6 +6,7 @@ extern crate rand;
 use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
 
+use nthash::result::ErrorKind;
 use nthash::{nthash, NtHashIterator};
 
 #[test]
@@ -53,10 +54,34 @@ fn iter_cmp() {
     let ksize = 5;
     for s in &vec!["TGCAG", "ACGTC", "ACGTCGTCAGTCGATGCAGT", "ACGTCGANNGTA"] {
         let seq = s.as_bytes();
-        let iter = NtHashIterator::new(seq, ksize);
+        let iter = NtHashIterator::new(seq, ksize).unwrap();
         println!("{:?}", s);
         assert_eq!(nthash(seq, ksize), iter.collect::<Vec<u64>>());
     }
+}
+
+#[test]
+fn out_of_range_ksize_wont_panic() {
+    let ksize: usize = 10;
+    let sequences = "TGCAG";
+    let err = NtHashIterator::new(&sequences.as_bytes(), ksize).unwrap_err();
+    assert_eq!(
+        err.to_string(),
+        "K size 10 is out of range for the given sequence size 5"
+    );
+}
+
+#[cfg(target_pointer_width = "64")]
+#[test]
+fn big_ksize_wont_panic() {
+    let ksize: usize = (u64::from(u32::max_value()) + 1) as usize;
+    let repetitions: usize = ((f64::from(u32::max_value()) * 1.5) / 5.0).ceil() as usize;
+    let sequences = "TGCAG".repeat(repetitions);
+    let err = NtHashIterator::new(&sequences.as_bytes(), ksize).unwrap_err();
+    assert_eq!(
+        err.to_string(),
+        "K size 4294967296 cannot excee the size of a u32 4294967295"
+    );
 }
 
 #[derive(Clone, Debug)]
@@ -81,7 +106,7 @@ quickcheck! {
   fn oracle_quickcheck(s: Seq) -> bool {
      let seq = s.0.as_bytes();
      (1..(seq.len())).all(|ksize| {
-       let iter = NtHashIterator::new(seq, ksize);
+       let iter = NtHashIterator::new(seq, ksize).unwrap();
        nthash(seq, ksize) == iter.collect::<Vec<u64>>()
      })
   }

@@ -8,6 +8,16 @@
 //! [Original implementation in C++](https://github.com/bcgsc/ntHash/)
 //!
 //! This crate is based on ntHash [1.0.4](https://github.com/bcgsc/ntHash/releases/tag/v1.0.4).
+//!
+
+#[macro_use]
+extern crate error_chain;
+
+pub mod result;
+
+use result::{ErrorKind, Result};
+
+pub(crate) const MAXIMUM_K_SIZE: usize = u32::max_value() as usize;
 
 #[inline(always)]
 fn h(c: u8) -> u64 {
@@ -109,6 +119,7 @@ pub fn nthash(seq: &[u8], ksize: usize) -> Vec<u64> {
 ///     assert_eq!(NtHashIterator::new(b"ACTGC", 3).collect::<Vec<u64>>(),
 ///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
 /// ```
+#[derive(Debug)]
 pub struct NtHashIterator<'a> {
     seq: &'a [u8],
     k: usize,
@@ -120,7 +131,13 @@ pub struct NtHashIterator<'a> {
 
 impl<'a> NtHashIterator<'a> {
     /// Creates a new NtHashIterator with internal state properly initialized.
-    pub fn new(seq: &'a [u8], k: usize) -> NtHashIterator<'a> {
+    pub fn new(seq: &'a [u8], k: usize) -> Result<NtHashIterator<'a>> {
+        if k > seq.len() {
+            bail!(ErrorKind::KSizeOutOfRange(k, seq.len()));
+        }
+        if k > MAXIMUM_K_SIZE {
+            bail!(ErrorKind::KSizeTooBig(k));
+        }
         let mut fh = 0;
         for (i, v) in seq[0..k].iter().enumerate() {
             fh ^= h(*v).rotate_left((k - i - 1) as u32);
@@ -131,14 +148,14 @@ impl<'a> NtHashIterator<'a> {
             rh ^= rc(*v).rotate_left((k - i - 1) as u32);
         }
 
-        NtHashIterator {
+        Ok(NtHashIterator {
             seq,
             k,
             fh,
             rh,
             current_idx: 0,
             max_idx: seq.len() - k + 1,
-        }
+        })
     }
 }
 
