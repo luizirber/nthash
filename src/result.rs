@@ -8,7 +8,7 @@ error_chain!{
         }
         KSizeTooBig(ksize: usize) {
             description("K size cannnot exceed the size of a u32")
-            display("K size {} cannot excee the size of a u32 {}", ksize, MAXIMUM_K_SIZE)
+            display("K size {} cannot exceed the size of a u32 {}", ksize, MAXIMUM_K_SIZE)
         }
     }
 }

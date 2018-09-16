@@ -6,7 +6,6 @@ extern crate rand;
 use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
 
-use nthash::result::ErrorKind;
 use nthash::{nthash, NtHashIterator};
 
 #[test]
@@ -80,7 +79,7 @@ fn big_ksize_wont_panic() {
     let err = NtHashIterator::new(&sequences.as_bytes(), ksize).unwrap_err();
     assert_eq!(
         err.to_string(),
-        "K size 4294967296 cannot excee the size of a u32 4294967295"
+        "K size 4294967296 cannot exceed the size of a u32 4294967295"
     );
 }
 
