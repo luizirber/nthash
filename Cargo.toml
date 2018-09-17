@@ -11,11 +11,12 @@ license = "MIT/Apache-2.0"
 readme = 'README.md'
 
 [dependencies]
+error-chain = "^0.12.0"
 
 [dev-dependencies]
-criterion = "0.2"
-quickcheck = "0.7.1"
-rand = "0.5"
+criterion = "^0.2"
+quickcheck = "^0.7.1"
+rand = "^0.5"
 
 [[bench]]
 name = "nthash"
