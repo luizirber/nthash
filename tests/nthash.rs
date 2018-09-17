@@ -72,6 +72,7 @@ fn out_of_range_ksize_wont_panic() {
 
 #[cfg(target_pointer_width = "64")]
 #[test]
+#[ignore]
 fn big_ksize_wont_panic() {
     let ksize: usize = (u64::from(u32::max_value()) + 1) as usize;
     let repetitions: usize = ((f64::from(u32::max_value()) * 1.5) / 5.0).ceil() as usize;
