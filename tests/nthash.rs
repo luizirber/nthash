@@ -75,7 +75,7 @@ fn out_of_range_ksize_wont_panic() {
 #[ignore]
 fn big_ksize_wont_panic() {
     let ksize: usize = (u64::from(u32::max_value()) + 1) as usize;
-    let repetitions: usize = ((f64::from(u32::max_value()) * 1.5) / 5.0).ceil() as usize;
+    let repetitions: usize = ((f64::from(u32::max_value()) + 1.0) / 5.0).ceil() as usize;
     let sequences = "TGCAG".repeat(repetitions);
     let err = NtHashIterator::new(&sequences.as_bytes(), ksize).unwrap_err();
     assert_eq!(
