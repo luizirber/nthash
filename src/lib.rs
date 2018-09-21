@@ -12,6 +12,8 @@
 
 #[macro_use]
 extern crate error_chain;
+#[macro_use]
+extern crate lazy_static;
 
 pub mod result;
 
@@ -19,28 +21,43 @@ use result::{ErrorKind, Result};
 
 pub(crate) const MAXIMUM_K_SIZE: usize = u32::max_value() as usize;
 
+lazy_static! {
+    static ref H_LOOKUP: [u64; 256] = {
+        let mut lookup = [1; 256];
+        lookup[b'A' as usize] = 0x3c8b_fbb3_95c6_0474;
+        lookup[b'C' as usize] = 0x3193_c185_62a0_2b4c;
+        lookup[b'G' as usize] = 0x2032_3ed0_8257_2324;
+        lookup[b'T' as usize] = 0x2955_49f5_4be2_4456;
+        lookup[b'N' as usize] = 0;
+        lookup
+    };
+    static ref RC_LOOKUP: [u64; 256] = {
+        let mut lookup = [1; 256];
+        lookup[b'A' as usize] = 0x2955_49f5_4be2_4456;
+        lookup[b'C' as usize] = 0x2032_3ed0_8257_2324;
+        lookup[b'G' as usize] = 0x3193_c185_62a0_2b4c;
+        lookup[b'T' as usize] = 0x3c8b_fbb3_95c6_0474;
+        lookup[b'N' as usize] = 0;
+        lookup
+    };
+}
+
 #[inline(always)]
 fn h(c: u8) -> u64 {
-    match c {
-        b'A' => 0x3c8b_fbb3_95c6_0474,
-        b'C' => 0x3193_c185_62a0_2b4c,
-        b'G' => 0x2032_3ed0_8257_2324,
-        b'T' => 0x2955_49f5_4be2_4456,
-        b'N' => 0,
-        _ => unreachable!(),
+    let val = H_LOOKUP[c as usize];
+    if val == 1 {
+        panic!("Non-ACGTN nucleotide encountered!")
     }
+    val
 }
 
 #[inline(always)]
 fn rc(nt: u8) -> u64 {
-    match nt {
-        b'A' => 0x2955_49f5_4be2_4456,
-        b'C' => 0x2032_3ed0_8257_2324,
-        b'G' => 0x3193_c185_62a0_2b4c,
-        b'T' => 0x3c8b_fbb3_95c6_0474,
-        b'N' => 0,
-        _ => unreachable!(),
+    let val = RC_LOOKUP[nt as usize];
+    if val == 1 {
+        panic!("Non-ACGTN nucleotide encountered!")
     }
+    val
 }
 
 /// Calculate the hash for a k-mer in the forward strand of a sequence.
