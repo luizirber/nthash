@@ -21,6 +21,8 @@ use result::{ErrorKind, Result};
 
 pub(crate) const MAXIMUM_K_SIZE: usize = u32::max_value() as usize;
 
+// Note: Replace this with a const fn when it's available in stable
+// https://github.com/rust-lang/rust/issues/24111
 lazy_static! {
     static ref H_LOOKUP: [u64; 256] = {
         let mut lookup = [1; 256];
