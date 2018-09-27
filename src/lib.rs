@@ -179,12 +179,9 @@ impl<'a> NtHashIterator<'a> {
             max_idx: seq.len() - k + 1,
         })
     }
-}
 
-impl<'a> Iterator for NtHashIterator<'a> {
-    type Item = u64;
-
-    fn next(&mut self) -> Option<u64> {
+    #[inline(always)]
+    fn _next_hash(&mut self) -> Option<u64> {
         if self.current_idx == self.max_idx {
             return None;
         };
@@ -203,6 +200,34 @@ impl<'a> Iterator for NtHashIterator<'a> {
 
         self.current_idx += 1;
         Some(u64::min(self.rh, self.fh))
+    }
+
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[target_feature(enable = "avx")]
+    unsafe fn _next_hash_avx(&mut self) -> Option<u64> {
+        self._next_hash()
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[target_feature(enable = "avx2")]
+    unsafe fn _next_hash_avx2(&mut self) -> Option<u64> {
+        self._next_hash()
+    }
+}
+
+impl<'a> Iterator for NtHashIterator<'a> {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<u64> {
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { self._next_hash_avx2() };
+            }
+            if is_x86_feature_detected!("avx") {
+                return unsafe { self._next_hash_avx() };
+            }
+        }
+        self._next_hash()
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
