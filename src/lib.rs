@@ -17,7 +17,7 @@ extern crate lazy_static;
 
 pub mod result;
 
-use result::{ErrorKind, Result};
+use crate::result::{ErrorKind, Result};
 
 pub(crate) const MAXIMUM_K_SIZE: usize = u32::max_value() as usize;
 
@@ -214,3 +214,5 @@ impl<'a> Iterator for NtHashIterator<'a> {
         (self.max_idx, Some(self.max_idx))
     }
 }
+
+impl<'a> ExactSizeIterator for NtHashIterator<'a> {}
