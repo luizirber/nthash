@@ -1,11 +1,10 @@
 #[macro_use]
 extern crate criterion;
-extern crate nthash;
-extern crate rand;
 
 use criterion::{Bencher, Criterion, Fun};
-use nthash::{nthash, NtHashIterator};
 use rand::distributions::{Distribution, Uniform};
+
+use nthash::{nthash, NtHashIterator};
 
 fn nthash_bench(c: &mut Criterion) {
     let range = Uniform::from(0..4);
