@@ -10,8 +10,6 @@
 //! This crate is based on ntHash [1.0.4](https://github.com/bcgsc/ntHash/releases/tag/v1.0.4).
 //!
 
-#![feature(min_const_fn)]
-
 #[macro_use]
 extern crate error_chain;
 
