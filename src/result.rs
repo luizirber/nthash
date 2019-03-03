@@ -1,6 +1,6 @@
 use super::MAXIMUM_K_SIZE;
 
-error_chain!{
+error_chain! {
     errors {
         KSizeOutOfRange(ksize: usize, seq_size: usize) {
             description("K size is out of range for the give sequence")
