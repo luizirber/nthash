@@ -1,7 +1,5 @@
-extern crate nthash;
 #[macro_use]
 extern crate quickcheck;
-extern crate rand;
 
 use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
