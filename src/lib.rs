@@ -214,3 +214,92 @@ impl<'a> Iterator for NtHashIterator<'a> {
 }
 
 impl<'a> ExactSizeIterator for NtHashIterator<'a> {}
+
+/// An efficient iterator for calculating hashes for genomic sequences. This
+/// returns the forward hashes, not the canonical hashes.
+///
+/// Since it implements the `Iterator` trait it also
+/// exposes many other useful methods. In this example we use `collect` to
+/// generate all hashes and put them in a `Vec<u64>`.
+/// ```
+///     # use nthash::result::Result;
+///     use nthash::NtHashForwardIterator;
+///
+///     # fn main() -> Result<()> {
+///     let seq = b"ACTGC";
+///     let iter = NtHashForwardIterator::new(seq, 3)?;
+///     let hashes: Vec<u64> = iter.collect();
+///     assert_eq!(hashes, [0xb85d2431d9ba031e, 0xb4d7ab2f9f1306b8, 0xd4a29bf149877c5c]);
+///     # Ok(())
+///     # }
+/// ```
+/// or, in one line:
+/// ```
+///     # use nthash::result::Result;
+///     use nthash::NtHashForwardIterator;
+///
+///     # fn main() -> Result<()> {
+///     assert_eq!(NtHashForwardIterator::new(b"ACTGC", 3)?.collect::<Vec<u64>>(),
+///                [0xb85d2431d9ba031e, 0xb4d7ab2f9f1306b8, 0xd4a29bf149877c5c]);
+///     # Ok(())
+///     # }
+/// ```
+#[derive(Debug)]
+pub struct NtHashForwardIterator<'a> {
+    seq: &'a [u8],
+    k: usize,
+    fh: u64,
+    current_idx: usize,
+    max_idx: usize,
+}
+
+impl<'a> NtHashForwardIterator<'a> {
+    /// Creates a new NtHashForwardIterator with internal state properly initialized.
+    pub fn new(seq: &'a [u8], k: usize) -> Result<NtHashForwardIterator<'a>> {
+        if k > seq.len() {
+            bail!(ErrorKind::KSizeOutOfRange(k, seq.len()));
+        }
+        if k > MAXIMUM_K_SIZE {
+            bail!(ErrorKind::KSizeTooBig(k));
+        }
+        let mut fh = 0;
+        for (i, v) in seq[0..k].iter().enumerate() {
+            fh ^= h(*v).rotate_left((k - i - 1) as u32);
+        }
+
+        Ok(NtHashForwardIterator {
+            seq,
+            k,
+            fh,
+            current_idx: 0,
+            max_idx: seq.len() - k + 1,
+        })
+    }
+}
+
+impl<'a> Iterator for NtHashForwardIterator<'a> {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<u64> {
+        if self.current_idx == self.max_idx {
+            return None;
+        };
+
+        if self.current_idx != 0 {
+            let i = self.current_idx - 1;
+            let seqi = self.seq[i];
+            let seqk = self.seq[i + self.k];
+
+            self.fh = self.fh.rotate_left(1) ^ h(seqi).rotate_left(self.k as u32) ^ h(seqk);
+        }
+
+        self.current_idx += 1;
+        Some(self.fh)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.max_idx, Some(self.max_idx))
+    }
+}
+
+impl<'a> ExactSizeIterator for NtHashForwardIterator<'a> {}
