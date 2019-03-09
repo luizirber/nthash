@@ -229,8 +229,7 @@ impl<'a> ExactSizeIterator for NtHashIterator<'a> {}
 ///     let seq = b"ACTGC";
 ///     let iter = NtHashForwardIterator::new(seq, 3)?;
 ///     let hashes: Vec<u64> = iter.collect();
-///     assert_eq!(hashes,
-///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
+///     assert_eq!(hashes, [0xb85d2431d9ba031e, 0xb4d7ab2f9f1306b8, 0xd4a29bf149877c5c]);
 ///     # Ok(())
 ///     # }
 /// ```
@@ -241,7 +240,7 @@ impl<'a> ExactSizeIterator for NtHashIterator<'a> {}
 ///
 ///     # fn main() -> Result<()> {
 ///     assert_eq!(NtHashForwardIterator::new(b"ACTGC", 3)?.collect::<Vec<u64>>(),
-///                vec![0x9b1eda9a185413ce, 0x9f6acfa2235b86fc, 0xd4a29bf149877c5c]);
+///                [0xb85d2431d9ba031e, 0xb4d7ab2f9f1306b8, 0xd4a29bf149877c5c]);
 ///     # Ok(())
 ///     # }
 /// ```
