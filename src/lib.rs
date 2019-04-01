@@ -19,7 +19,7 @@ use crate::result::{ErrorKind, Result};
 
 pub(crate) const MAXIMUM_K_SIZE: usize = u32::max_value() as usize;
 
-const fn h_lookup_table() -> [u64; 256] {
+const H_LOOKUP: [u64; 256] = {
     let mut lookup = [1; 256];
     lookup[b'A' as usize] = 0x3c8b_fbb3_95c6_0474;
     lookup[b'C' as usize] = 0x3193_c185_62a0_2b4c;
@@ -27,9 +27,9 @@ const fn h_lookup_table() -> [u64; 256] {
     lookup[b'T' as usize] = 0x2955_49f5_4be2_4456;
     lookup[b'N' as usize] = 0;
     lookup
-}
+};
 
-const fn rc_lookup_table() -> [u64; 256] {
+const RC_LOOKUP: [u64; 256] = {
     let mut lookup = [1; 256];
     lookup[b'A' as usize] = 0x2955_49f5_4be2_4456;
     lookup[b'C' as usize] = 0x2032_3ed0_8257_2324;
@@ -37,10 +37,7 @@ const fn rc_lookup_table() -> [u64; 256] {
     lookup[b'T' as usize] = 0x3c8b_fbb3_95c6_0474;
     lookup[b'N' as usize] = 0;
     lookup
-}
-
-const H_LOOKUP: [u64; 256] = h_lookup_table();
-const RC_LOOKUP: [u64; 256] = rc_lookup_table();
+};
 
 #[inline(always)]
 fn h(c: u8) -> u64 {
