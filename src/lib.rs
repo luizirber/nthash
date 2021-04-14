@@ -10,12 +10,9 @@
 //! This crate is based on ntHash [1.0.4](https://github.com/bcgsc/ntHash/releases/tag/v1.0.4).
 //!
 
-#[macro_use]
-extern crate error_chain;
+mod error;
 
-pub mod result;
-
-use crate::result::{ErrorKind, Result};
+pub use crate::error::{Error, Result};
 
 pub(crate) const MAXIMUM_K_SIZE: usize = u32::max_value() as usize;
 
@@ -118,7 +115,7 @@ pub fn nthash(seq: &[u8], ksize: usize) -> Vec<u64> {
 /// exposes many other useful methods. In this example we use `collect` to
 /// generate all hashes and put them in a `Vec<u64>`.
 /// ```
-///     # use nthash::result::Result;
+///     # use nthash::Result;
 ///     use nthash::NtHashIterator;
 ///
 ///     # fn main() -> Result<()> {
@@ -132,7 +129,7 @@ pub fn nthash(seq: &[u8], ksize: usize) -> Vec<u64> {
 /// ```
 /// or, in one line:
 /// ```
-///     # use nthash::result::Result;
+///     # use nthash::Result;
 ///     use nthash::NtHashIterator;
 ///
 ///     # fn main() -> Result<()> {
@@ -155,10 +152,13 @@ impl<'a> NtHashIterator<'a> {
     /// Creates a new NtHashIterator with internal state properly initialized.
     pub fn new(seq: &'a [u8], k: usize) -> Result<NtHashIterator<'a>> {
         if k > seq.len() {
-            bail!(ErrorKind::KSizeOutOfRange(k, seq.len()));
+            return Err(Error::KSizeOutOfRange {
+                ksize: k,
+                seq_size: seq.len(),
+            });
         }
         if k > MAXIMUM_K_SIZE {
-            bail!(ErrorKind::KSizeTooBig(k));
+            return Err(Error::KSizeTooBig(k));
         }
         let mut fh = 0;
         for (i, v) in seq[0..k].iter().enumerate() {
@@ -219,7 +219,7 @@ impl<'a> ExactSizeIterator for NtHashIterator<'a> {}
 /// exposes many other useful methods. In this example we use `collect` to
 /// generate all hashes and put them in a `Vec<u64>`.
 /// ```
-///     # use nthash::result::Result;
+///     # use nthash::Result;
 ///     use nthash::NtHashForwardIterator;
 ///
 ///     # fn main() -> Result<()> {
@@ -232,7 +232,7 @@ impl<'a> ExactSizeIterator for NtHashIterator<'a> {}
 /// ```
 /// or, in one line:
 /// ```
-///     # use nthash::result::Result;
+///     # use nthash::Result;
 ///     use nthash::NtHashForwardIterator;
 ///
 ///     # fn main() -> Result<()> {
@@ -254,11 +254,15 @@ impl<'a> NtHashForwardIterator<'a> {
     /// Creates a new NtHashForwardIterator with internal state properly initialized.
     pub fn new(seq: &'a [u8], k: usize) -> Result<NtHashForwardIterator<'a>> {
         if k > seq.len() {
-            bail!(ErrorKind::KSizeOutOfRange(k, seq.len()));
+            return Err(Error::KSizeOutOfRange {
+                ksize: k,
+                seq_size: seq.len(),
+            });
         }
         if k > MAXIMUM_K_SIZE {
-            bail!(ErrorKind::KSizeTooBig(k));
+            return Err(Error::KSizeTooBig(k));
         }
+
         let mut fh = 0;
         for (i, v) in seq[0..k].iter().enumerate() {
             fh ^= h(*v).rotate_left((k - i - 1) as u32);
