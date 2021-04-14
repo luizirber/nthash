@@ -4,7 +4,7 @@
 
 **[ntHash](https://github.com/bcgsc/ntHash) implementation in Rust**
 
-[![Build Status](https://travis-ci.com/luizirber/nthash.svg?branch=master)](https://travis-ci.com/luizirber/nthash)
+[![Build Status](https://github.com/luizirber/nthash/actions/workflows/ci.yml/badge.svg)](https://github.com/luizirber/nthash/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/nthash.svg)](https://crates.io/crates/nthash)
 [![Documentation](https://docs.rs/nthash/badge.svg)](https://docs.rs/nthash/)
 
