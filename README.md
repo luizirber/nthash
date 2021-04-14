@@ -10,6 +10,10 @@
 
 ntHash (version [1.0.4](https://github.com/bcgsc/ntHash/releases/tag/v1.0.4)) implementation in Rust.
 
+## Minimum supported Rust version
+
+Currently the minimum supported Rust version is 1.37.0.
+
 ## License
 
 Licensed under either of these:
