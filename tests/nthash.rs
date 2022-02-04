@@ -57,11 +57,20 @@ fn iter_cmp() {
     }
 }
 
+#[should_panic(expected = "Non-ACGTN nucleotide encountered! E")]
+#[test]
+fn panic_non_acgtn() {
+    let ksize: usize = 2;
+    let sequences = "TGCAGNE";
+    let iter = NtHashIterator::new(sequences.as_bytes(), ksize).unwrap();
+    let _: Vec<u64> = iter.collect();
+}
+
 #[test]
 fn out_of_range_ksize_wont_panic() {
     let ksize: usize = 10;
     let sequences = "TGCAG";
-    let err = NtHashIterator::new(&sequences.as_bytes(), ksize).unwrap_err();
+    let err = NtHashIterator::new(sequences.as_bytes(), ksize).unwrap_err();
     assert_eq!(
         err.to_string(),
         "K size 10 is out of range for the given sequence size 5"
@@ -75,7 +84,7 @@ fn big_ksize_wont_panic() {
     let ksize: usize = (u64::from(u32::max_value()) + 1) as usize;
     let repetitions: usize = ((f64::from(u32::max_value()) + 1.0) / 5.0).ceil() as usize;
     let sequences = "TGCAG".repeat(repetitions);
-    let err = NtHashIterator::new(&sequences.as_bytes(), ksize).unwrap_err();
+    let err = NtHashIterator::new(sequences.as_bytes(), ksize).unwrap_err();
     assert_eq!(
         err.to_string(),
         "K size 4294967296 cannot exceed the size of a u32 4294967295"

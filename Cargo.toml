@@ -1,6 +1,6 @@
 [package]
 name = "nthash"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Luiz Irber <luiz.irber@gmail.com>"]
 description = "ntHash is a rolling hash function for hashing all possible k-mers in a DNA sequence."
 repository = "https://github.com/luizirber/nthash"
