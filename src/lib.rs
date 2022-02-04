@@ -40,7 +40,7 @@ const RC_LOOKUP: [u64; 256] = {
 fn h(c: u8) -> u64 {
     let val = H_LOOKUP[c as usize];
     if val == 1 {
-        panic!("Non-ACGTN nucleotide encountered!")
+        panic!("Non-ACGTN nucleotide encountered! {}", c as char)
     }
     val
 }
@@ -49,7 +49,7 @@ fn h(c: u8) -> u64 {
 fn rc(nt: u8) -> u64 {
     let val = RC_LOOKUP[nt as usize];
     if val == 1 {
-        panic!("Non-ACGTN nucleotide encountered!")
+        panic!("Non-ACGTN nucleotide encountered! {}", nt as char)
     }
     val
 }
