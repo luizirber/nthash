@@ -184,6 +184,7 @@ impl<'a> NtHashIterator<'a> {
 impl<'a> Iterator for NtHashIterator<'a> {
     type Item = u64;
 
+    #[inline(always)]
     fn next(&mut self) -> Option<u64> {
         if self.current_idx == self.max_idx {
             return None;
@@ -281,6 +282,7 @@ impl<'a> NtHashForwardIterator<'a> {
 impl<'a> Iterator for NtHashForwardIterator<'a> {
     type Item = u64;
 
+    #[inline(always)]
     fn next(&mut self) -> Option<u64> {
         if self.current_idx == self.max_idx {
             return None;
