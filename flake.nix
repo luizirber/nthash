@@ -26,12 +26,7 @@
             ]
           );
         };
-        rust-project.toolchain = (pkgs.rust-bin.fromRustupToolchainFile (./rust-toolchain.toml)).override {
-            extensions = [
-              "rust-src"
-              "clippy"
-            ];
-        };
+        rust-project.toolchain = (pkgs.rust-bin.fromRustupToolchainFile (./rust-toolchain.toml));
 
         # Add your auto-formatters here.
         # cf. https://nixos.asia/en/treefmt
