@@ -12,7 +12,7 @@ ntHash (version [1.0.4](https://github.com/bcgsc/ntHash/releases/tag/v1.0.4)) im
 
 ## Minimum supported Rust version
 
-Currently the minimum supported Rust version is 1.37.0.
+Currently the minimum supported Rust version is 1.56.0.
 
 ## License
 
