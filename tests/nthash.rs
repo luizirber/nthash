@@ -1,4 +1,4 @@
-use quickcheck::{Arbitrary, Gen, quickcheck};
+use quickcheck::{quickcheck, Arbitrary, Gen};
 
 use nthash::{nthash, NtHashIterator};
 
