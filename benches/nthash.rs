@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::{Bencher, Criterion, Fun};
+use criterion::Criterion;
 use rand::distributions::{Distribution, Uniform};
 
 use nthash::{nthash, NtHashIterator};
@@ -19,22 +19,21 @@ fn nthash_bench(c: &mut Criterion) {
         })
         .collect::<String>();
 
-    let nthash_it = Fun::new("nthash_iterator", |b: &mut Bencher, i: &String| {
+    let mut group = c.benchmark_group("nthash");
+
+    group.bench_function("nthash_iterator", |b| {
         b.iter(|| {
-            let iter = NtHashIterator::new(i.as_bytes(), 5).unwrap();
+            let iter = NtHashIterator::new(seq.as_bytes(), 5).unwrap();
             //  iter.for_each(drop);
             let _res = iter.collect::<Vec<u64>>();
         })
     });
 
-    let nthash_simple = Fun::new("nthash_simple", |b: &mut Bencher, i: &String| {
+    group.bench_function("nthash_simple", |b| {
         b.iter(|| {
-            nthash(i.as_bytes(), 5);
+            nthash(seq.as_bytes(), 5);
         })
     });
-
-    let functions = vec![nthash_it, nthash_simple];
-    c.bench_functions("nthash", functions, seq);
 }
 
 criterion_group!(benches, nthash_bench);
