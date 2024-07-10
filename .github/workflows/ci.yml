@@ -89,46 +89,35 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: stable
           override: true
 
-      - name: Get Rust Version
-        id: rust-version
-        run: echo "::set-output name=version::$(cargo -V | head -n1 | awk '{print $2}')"
-
-      - name: Get Tarpaulin Version
-        id: tarpaulin-version
-        run: echo "::set-output name=version::$(wget -qO- 'https://api.github.com/repos/xd009642/tarpaulin/releases/latest' | jq -r '.tag_name')"
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/bin/cargo-tarpaulin
-            ~/.cargo/git
-            ~/.cargo/registry
-            target
-          key: ${{ runner.os }}-cargo-${{ steps.rust-version.outputs.version }}-tarpaulin-${{ steps.tarpaulin-version.outputs.version }} }}
-
-      - name: Install Tarpaulin
+      - name: Install cargo-binstall
         run: |
-          test -e ~/.cargo/bin/cargo-tarpaulin || cargo install cargo-tarpaulin --version ${{ steps.tarpaulin-version.outputs.version }}
+          wget https://github.com/ryankurte/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-gnu.tgz
+          tar xf cargo-binstall-x86_64-unknown-linux-gnu.tgz
+          chmod +x cargo-binstall
+          mv cargo-binstall "$HOME/.cargo/bin"
+
+      - name: Install cargo-tarpaulin
+        run: cargo binstall --no-confirm cargo-tarpaulin
 
       - name: Run cargo-tarpaulin
         run: cargo tarpaulin --timeout 600 --out Xml -- --test-threads 1
 
       - name: Upload coverage to codecov
-        uses: codecov/codecov-action@v1.0.3
+        uses: codecov/codecov-action@v3
 
   lints:
     name: Lints
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
