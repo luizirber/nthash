@@ -42,6 +42,8 @@
           inputsFrom = [ self'.devShells.nthash ];
           packages = [
             pkgs.cargo-watch
+            pkgs.cargo-codspeed
+            pkgs.cargo-criterion
           ];
         };
         packages.default = self'.packages.nthash;

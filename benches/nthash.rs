@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate criterion;
-
-use criterion::Criterion;
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 use rand::distributions::{Distribution, Uniform};
 
 use nthash::{nthash, NtHashIterator};
