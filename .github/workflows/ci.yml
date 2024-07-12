@@ -67,8 +67,6 @@ jobs:
       matrix:
         target: [
           aarch64-unknown-linux-gnu,
-          powerpc64le-unknown-linux-gnu,
-          s390x-unknown-linux-gnu,
         ]
     steps:
       - uses: actions/checkout@v2
@@ -85,6 +83,30 @@ jobs:
           use-cross: true
           command: test
           args: --target ${{ matrix.target }} --no-fail-fast --
+
+  cross_build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [
+          powerpc64le-unknown-linux-gnu,
+          s390x-unknown-linux-gnu,
+        ]
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
 
   coverage:
     runs-on: ubuntu-latest

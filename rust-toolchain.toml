@@ -1,5 +1,5 @@
 [toolchain]
-#channel = "stable"
-#components = ["rust-src", "rust-analyzer", "clippy"]
-channel = "1.63.0"
-components = ["rust-src", "clippy"]
+channel = "stable"
+components = ["rust-src", "rust-analyzer", "clippy"]
+#channel = "1.63.0"
+#components = ["rust-src", "clippy"]
