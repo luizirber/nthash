@@ -1,8 +1,4 @@
-#[macro_use]
-extern crate quickcheck;
-
-use quickcheck::{Arbitrary, Gen};
-use rand::Rng;
+use quickcheck::{quickcheck, Arbitrary, Gen};
 
 use nthash::{nthash, NtHashIterator};
 
@@ -95,17 +91,14 @@ fn big_ksize_wont_panic() {
 struct Seq(String);
 
 impl Arbitrary for Seq {
-    fn arbitrary<G: Gen>(g: &mut G) -> Seq {
+    fn arbitrary(g: &mut Gen) -> Seq {
         let choices = ['A', 'C', 'G', 'T', 'N'];
-        let size = {
-            let s = g.size();
-            g.gen_range(0, s)
-        };
+        let size = g.size();
         let mut s = String::with_capacity(size);
         for _ in 0..size {
             s.push(*g.choose(&choices).expect("Not a valid nucleotide"));
         }
-        Seq { 0: s }
+        Seq(s)
     }
 }
 

@@ -1,3 +1,6 @@
 /target
 **/*.rs.bk
 Cargo.lock
+/result
+/result-lib
+.direnv
