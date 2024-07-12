@@ -25,10 +25,10 @@ jobs:
           bins: cargo-codspeed
 
       - name: Build the benchmark target(s)
-        run: cargo codspeed build -p sourmash
+        run: cargo codspeed build
 
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v2
         with:
-          run: "cd src/core && cargo codspeed run"
+          run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
